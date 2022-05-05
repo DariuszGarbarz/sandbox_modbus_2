@@ -15,6 +15,7 @@ namespace SandboxModbus2
             builder.RegisterType<Application>().As<IApplication>();
             builder.RegisterType<ModbusReadData>().As<IModbusReadData>();
             builder.RegisterType<ConsolePrintData>().As<IConsolePrintData>();
+            builder.RegisterType<TcpClientFactory>().As<ITcpClientFactory>().InstancePerLifetimeScope();
 
             return builder.Build();
         }

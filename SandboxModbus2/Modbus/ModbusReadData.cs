@@ -11,32 +11,29 @@ namespace SandboxModbus2.Modbus
 {
     public class ModbusReadData : IModbusReadData
     {
-        public async Task<DeviceModel> ReadData()
+        public async Task<DeviceModel> ReadData(ITcpClientFactory tcpClientFactory)
         {
             try
             {
-                var factory = new ModbusFactory();
+                //var factory = new ModbusFactory();
+                //var client = new TcpClient();
+                //var master = factory.CreateMaster(client);
+                //await tcpClientFactory.Client.ConnectAsync(ModbusSettings.hostname, ModbusSettings.port);
 
-                using (var client = new TcpClient())
-                using (var master = factory.CreateMaster(client))
+                var systemStatus = await SystemStatusRead(tcpClientFactory.Master);
+
+                var deviceName = await DeviceNameRead(tcpClientFactory.Master);
+
+                var sensors = await SensorsRead(tcpClientFactory.Master, ModbusSettings.sensorsNumber);
+
+                DeviceModel deviceModel = new DeviceModel()
                 {
-                    await client.ConnectAsync(ModbusSettings.hostname, ModbusSettings.port);
+                    SystemStatus = systemStatus,
+                    DeviceName = deviceName,
+                    Sensors = sensors
+                };
 
-                    var systemStatus = await SystemStatusRead(master);
-
-                    var deviceName = await DeviceNameRead(master);
-
-                    var sensors = await SensorsRead(master, ModbusSettings.sensorsNumber);
-
-                    DeviceModel deviceModel = new DeviceModel()
-                    {
-                        SystemStatus = systemStatus,
-                        DeviceName = deviceName,
-                        Sensors = sensors
-                    };
-
-                    return deviceModel;
-                }
+                return deviceModel;
             }
             catch (Exception ex)
             {

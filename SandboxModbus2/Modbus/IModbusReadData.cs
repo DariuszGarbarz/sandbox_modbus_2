@@ -8,7 +8,7 @@ namespace SandboxModbus2.Modbus
     public interface IModbusReadData
     {
         Task<string> DeviceNameRead(IModbusMaster master);
-        Task<DeviceModel> ReadData();
+        Task<DeviceModel> ReadData(ITcpClientFactory tcpClientFactory);
         Task<List<SensorModel>> SensorsRead(IModbusMaster master, int sensorsNumber);
         Task<ushort> SystemStatusRead(IModbusMaster master);
     }

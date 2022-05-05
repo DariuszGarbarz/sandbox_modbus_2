@@ -9,5 +9,6 @@ namespace SandboxModbus2.Modbus
         public static string hostname = "localhost";
         public static int port = 502;
         public static int sensorsNumber = 10;
+        public static int refreshDataMs = 5000;
     }
 }
