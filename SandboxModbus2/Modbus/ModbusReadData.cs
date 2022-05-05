@@ -1,15 +1,17 @@
 ﻿using NModbus;
+using SandboxModbus2.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SandboxModbus2.Modbus
 {
     public class ModbusReadData : IModbusReadData
     {
-        public async Task ReadData()
+        public async Task<DeviceModel> ReadData()
         {
             try
             {
@@ -20,44 +22,44 @@ namespace SandboxModbus2.Modbus
                 {
                     await client.ConnectAsync(ModbusSettings.hostname, ModbusSettings.port);
 
-                    await SystemStatusRead(master);
+                    var systemStatus = await SystemStatusRead(master);
 
-                    await DeviceNameRead(master);
+                    var deviceName = await DeviceNameRead(master);
 
-                    await SensorsRead(master, ModbusSettings.sensorsNumber);
+                    var sensors = await SensorsRead(master, ModbusSettings.sensorsNumber);
+
+                    DeviceModel deviceModel = new DeviceModel()
+                    {
+                        SystemStatus = systemStatus,
+                        DeviceName = deviceName,
+                        Sensors = sensors
+                    };
+
+                    return deviceModel;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return new DeviceModel();
             }
         }
 
-        public async Task SystemStatusRead(IModbusMaster master)
+        public async Task<ushort> SystemStatusRead(IModbusMaster master)
         {
             try
             {
                 var systemStatus = (await master.ReadHoldingRegistersAsync(1, 0, 1));
-
-                switch (systemStatus[0])
-                {
-                    case 1:
-                        Console.WriteLine("System status - normal");
-                        break;
-                    case 2:
-                        Console.WriteLine("System status - fault");
-                        break;
-                    default:
-                        throw new Exception("Connection Problem");
-                }
+                return systemStatus[0];
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return 0;
             }
         }
 
-        public async Task DeviceNameRead(IModbusMaster master)
+        public async Task<string> DeviceNameRead(IModbusMaster master)
         {
             try
             {
@@ -73,53 +75,42 @@ namespace SandboxModbus2.Modbus
 
                 String decodedString = ascii.GetString(bytes);
 
-                Console.WriteLine($"Device Name: {decodedString}");
+                return decodedString;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return string.Empty;
             }
         }
 
-        public async Task SensorsRead(IModbusMaster master, int sensorsNumber)
+        public async Task<List<SensorModel>> SensorsRead(IModbusMaster master, int sensorsNumber)
         {
             try
             {
+                List<SensorModel> sensors = new List<SensorModel>();
+
                 for (int i = 1; i < sensorsNumber + 1; i++)
                 {
-                    Console.WriteLine("--------------------------");
-                    Console.WriteLine($"Sensor number - {i}");
-                    Console.WriteLine("--------------------------");
                     int startAdress = i * 100;
                     var sensorData = await master.ReadHoldingRegistersAsync(1, (ushort)startAdress, 4);
-
-                    switch (sensorData[0])
-                    {
-                        case 1:
-                            Console.WriteLine("Sensor status - Online");
-                            break;
-                        case 2:
-                            Console.WriteLine("Sensor status - Alarm");
-                            break;
-                        case 3:
-                            Console.WriteLine("Sensor status - Fault");
-                            break;
-                        case 4:
-                            Console.WriteLine("Sensor status - Disabled");
-                            break;
-                        default:
-                            throw new Exception("Connection Problem");
-                    }
-                    Console.WriteLine($"Current temperature: {sensorData[1]}");
-                    Console.WriteLine($"Lower limit: {sensorData[2]}");
-                    Console.WriteLine($"Higher limit: {sensorData[3]}");
+                    SensorModel sensorModel = new SensorModel() 
+                    { 
+                        SensorNumber = i,
+                        SensorStatus = sensorData[0],
+                        CurrentTemperature = sensorData[1],
+                        LowerLimit = sensorData[2],
+                        HigherLimit = sensorData[3],
+                    };
+                    sensors.Add(sensorModel);
                 }
+                return sensors;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return new List<SensorModel>();
             }
-
         }
     }
 }

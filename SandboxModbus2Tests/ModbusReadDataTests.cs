@@ -2,13 +2,15 @@ using Moq;
 using NModbus;
 using NUnit.Framework;
 using SandboxModbus2.Modbus;
+using SandboxModbus2.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace SandboxModbus2Tests
 {
-    public class Tests
+    public class ModbusReadDataTests
     {
         private readonly Mock<IModbusMaster> _masterMock = new Mock<IModbusMaster>();
         [SetUp]
@@ -22,22 +24,19 @@ namespace SandboxModbus2Tests
         public async Task SystemStatusReadTest()
         {
             //arrange
+            ushort expectedValue = 1;
             var expected = new ushort[1]
             {
                 1
             };
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync(1, 0, 1))
                 .ReturnsAsync(expected);
-            var expectedMessage = "System status - normal\r\n";
-            var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
 
             //act
-            await _modbusReadData.SystemStatusRead(_masterMock.Object);
+            var actualValue = await _modbusReadData.SystemStatusRead(_masterMock.Object);
 
             //assert
-            var actualMessage = stringWriter.ToString();
-            Assert.AreEqual(expectedMessage, actualMessage);
+            Assert.AreEqual(expectedValue, actualValue);
         }
 
         [Test]
@@ -50,16 +49,14 @@ namespace SandboxModbus2Tests
             };
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync(1, 1, 32))
                 .ReturnsAsync(expected);
-            var expectedMessage = "Device Name: ELACOMPIL\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n";
-            var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
+            var expectedString = "ELACOMPIL\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+            
 
             //act
-            await _modbusReadData.DeviceNameRead(_masterMock.Object);
+            var actualString = await _modbusReadData.DeviceNameRead(_masterMock.Object);
 
             //assert
-            var actualMessage = stringWriter.ToString();
-            Assert.AreEqual(expectedMessage, actualMessage);
+            Assert.AreEqual(expectedString, actualString);
         }
 
         [Test]
@@ -67,6 +64,25 @@ namespace SandboxModbus2Tests
         {
             //arrange
             var sensorsNumber = 2;
+            List<SensorModel> expectedSensors = new List<SensorModel>();
+            expectedSensors.Add(new SensorModel
+            {
+                SensorNumber = 1,
+                SensorStatus = 1,
+                CurrentTemperature = 10,
+                LowerLimit = 5,
+                HigherLimit = 20
+            });
+
+            expectedSensors.Add(new SensorModel
+            {
+                SensorNumber = 2,
+                SensorStatus = 2,
+                CurrentTemperature = 0,
+                LowerLimit = 0,
+                HigherLimit = 0
+            });
+
             var expected1 = new ushort[4]
             {
                 1, 10, 5, 20
@@ -75,21 +91,25 @@ namespace SandboxModbus2Tests
             {
                 2, 0, 0, 0
             };
+
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync(1, 100, 4))
                 .ReturnsAsync(expected1);
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync(1, 200, 4))
-                .ReturnsAsync(expected2);
-            var expectedMessage = "--------------------------\r\nSensor number - 1\r\n--------------------------\r\nSensor status - Online\r\nCurrent temperature: 10\r\nLower limit: 5\r\nHigher limit: 20\r\n" +
-                                  "--------------------------\r\nSensor number - 2\r\n--------------------------\r\nSensor status - Alarm\r\nCurrent temperature: 0\r\nLower limit: 0\r\nHigher limit: 0\r\n";
-            var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
+                .ReturnsAsync(expected2);            
 
             //act
-            await _modbusReadData.SensorsRead(_masterMock.Object, sensorsNumber);
+            var actualSensors = await _modbusReadData.SensorsRead(_masterMock.Object, sensorsNumber);
 
             //assert
-            var actualMessage = stringWriter.ToString();
-            Assert.AreEqual(expectedMessage, actualMessage);
+            for (int i = 0; i < sensorsNumber; i++)
+            {
+                Assert.AreEqual(expectedSensors[i].SensorNumber, actualSensors[i].SensorNumber);
+                Assert.AreEqual(expectedSensors[i].SensorStatus, actualSensors[i].SensorStatus);
+                Assert.AreEqual(expectedSensors[i].CurrentTemperature, actualSensors[i].CurrentTemperature);
+                Assert.AreEqual(expectedSensors[i].LowerLimit, actualSensors[i].LowerLimit);
+                Assert.AreEqual(expectedSensors[i].HigherLimit, actualSensors[i].HigherLimit);
+            }
+            
         }
     }
 }

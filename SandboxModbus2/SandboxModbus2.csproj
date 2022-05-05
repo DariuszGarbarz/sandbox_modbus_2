@@ -11,4 +11,8 @@
     <PackageReference Include="NModbus" Version="3.0.72" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Enums\" />
+  </ItemGroup>
+
 </Project>

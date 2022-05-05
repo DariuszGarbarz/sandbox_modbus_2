@@ -8,15 +8,16 @@ namespace SandboxModbus2
 {
     public class Application : IApplication
     {
-        IModbusReadData _modbusReadData;
-        public Application(IModbusReadData modbusReadData)
+        IConsolePrintData _consolePrintData;
+ 
+        public Application(IConsolePrintData consolePrintData)
         {
-            _modbusReadData = modbusReadData;
+            _consolePrintData = consolePrintData;
         }
 
         public void Run()
         {
-            Task.Run(() => _modbusReadData.ReadData());
+            Task.Run(() => _consolePrintData.PrintDataAsync());
         }
     }
 }
