@@ -11,26 +11,22 @@ namespace SandboxModbus2.Modbus
 {
     public class ModbusReadData : IModbusReadData
     {
-        public async Task<DeviceModel> ReadData(ITcpClientFactory tcpClientFactory)
+        public async Task<DeviceModel> ReadData(ITcpClientFactory tcpClientFactory, byte slaveNumber)
         {
             try
             {
-                //var factory = new ModbusFactory();
-                //var client = new TcpClient();
-                //var master = factory.CreateMaster(client);
-                //await tcpClientFactory.Client.ConnectAsync(ModbusSettings.hostname, ModbusSettings.port);
+                var systemStatus = await SystemStatusRead(tcpClientFactory.Master, slaveNumber);
 
-                var systemStatus = await SystemStatusRead(tcpClientFactory.Master);
+                var deviceName = await DeviceNameRead(tcpClientFactory.Master, slaveNumber);
 
-                var deviceName = await DeviceNameRead(tcpClientFactory.Master);
-
-                var sensors = await SensorsRead(tcpClientFactory.Master, ModbusSettings.sensorsNumber);
+                var sensors = await SensorsRead(tcpClientFactory.Master, ModbusSettings.sensorsNumber, slaveNumber);
 
                 DeviceModel deviceModel = new DeviceModel()
                 {
                     SystemStatus = systemStatus,
                     DeviceName = deviceName,
-                    Sensors = sensors
+                    Sensors = sensors,
+                    SlaveNumber = slaveNumber
                 };
 
                 return deviceModel;
@@ -42,11 +38,11 @@ namespace SandboxModbus2.Modbus
             }
         }
 
-        public async Task<ushort> SystemStatusRead(IModbusMaster master)
+        public async Task<ushort> SystemStatusRead(IModbusMaster master, byte slaveNumber)
         {
             try
             {
-                var systemStatus = (await master.ReadHoldingRegistersAsync(1, 0, 1));
+                var systemStatus = (await master.ReadHoldingRegistersAsync(slaveNumber, ModbusSettings.systemStatusStartAdress, ModbusSettings.systemStatusNumberOfPoints));
                 return systemStatus[0];
             }
             catch (Exception ex)
@@ -56,16 +52,16 @@ namespace SandboxModbus2.Modbus
             }
         }
 
-        public async Task<string> DeviceNameRead(IModbusMaster master)
+        public async Task<string> DeviceNameRead(IModbusMaster master, byte slaveNumber)
         {
             try
             {
-                var deviceName = await master.ReadHoldingRegistersAsync(1, 1, 32);
+                var deviceName = await master.ReadHoldingRegistersAsync(slaveNumber, ModbusSettings.deviceNameStartAdress, ModbusSettings.deviceNameNumberOfPoints);
                 Encoding ascii = Encoding.ASCII;
 
-                var bytes = new byte[31];
+                var bytes = new byte[ModbusSettings.deviceNameNumberOfPoints-1];
 
-                for (int i = 0; i < 31; i++)
+                for (int i = 0; i < ModbusSettings.deviceNameNumberOfPoints - 1; i++)
                 {
                     bytes[i] = (byte)(deviceName[i]);
                 }
@@ -81,7 +77,7 @@ namespace SandboxModbus2.Modbus
             }
         }
 
-        public async Task<List<SensorModel>> SensorsRead(IModbusMaster master, int sensorsNumber)
+        public async Task<List<SensorModel>> SensorsRead(IModbusMaster master, int sensorsNumber, byte slaveNumber)
         {
             try
             {
@@ -89,8 +85,8 @@ namespace SandboxModbus2.Modbus
 
                 for (int i = 1; i < sensorsNumber + 1; i++)
                 {
-                    int startAdress = i * 100;
-                    var sensorData = await master.ReadHoldingRegistersAsync(1, (ushort)startAdress, 4);
+                    int startAdress = i * ModbusSettings.sensorStartAdress;
+                    var sensorData = await master.ReadHoldingRegistersAsync(slaveNumber, (ushort)startAdress, ModbusSettings.sensorNumberOfPoints);
                     SensorModel sensorModel = new SensorModel() 
                     { 
                         SensorNumber = i,

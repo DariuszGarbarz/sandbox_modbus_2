@@ -1,4 +1,5 @@
 ﻿using NModbus;
+using SandboxModbus2.Enums;
 using SandboxModbus2.Models;
 using System;
 using System.Collections.Generic;
@@ -24,54 +25,27 @@ namespace SandboxModbus2.Modbus
             {
                 while (true)
                 {
-                    var deviceModel = await _modbusReadData.ReadData(_tcpClientFactory);
-
-                    Console.WriteLine("-------------------------");
-                    Console.WriteLine("{0}",DateTime.Now.ToString());
-                    Console.WriteLine("-------------------------");
-                    Console.WriteLine($"Slave number: {deviceModel.SlaveNumber}");
-
-                    switch (deviceModel.SystemStatus)
+                    for (byte a = 1; a < ModbusSettings.slavesNumber+1; a++)
                     {
-                        case 1:
-                            Console.WriteLine("System status - normal");
-                            break;
-                        case 2:
-                            Console.WriteLine("System status - fault");
-                            break;
-                        default:
-                            throw new Exception("Connection Problem");
-                    }
+                        var deviceModel = await _modbusReadData.ReadData(_tcpClientFactory, a);
 
-                    Console.WriteLine($"Device Name:{deviceModel.DeviceName}");
+                        Console.WriteLine(ModbusSettings.printDecor);
+                        Console.WriteLine("{0}", DateTime.Now.ToString());
+                        Console.WriteLine(ModbusSettings.printDecor);
+                        Console.WriteLine($"Slave number: {deviceModel.SlaveNumber}");
+                        Console.WriteLine("System Status: {0}", (SystemStatusEnum)deviceModel.SystemStatus);
+                        Console.WriteLine($"Device Name:{deviceModel.DeviceName}");
 
-                    for (int i = 0; i < deviceModel.Sensors.Count; i++)
-                    {
-                        Console.WriteLine("--------------------------");
-                        Console.WriteLine($"Sensor number - {deviceModel.Sensors[i].SensorNumber}");
-                        Console.WriteLine("--------------------------");
-
-                        switch (deviceModel.Sensors[i].SensorStatus)
+                        for (int i = 0; i < deviceModel.Sensors.Count; i++)
                         {
-                            case 1:
-                                Console.WriteLine("Sensor status - Online");
-                                break;
-                            case 2:
-                                Console.WriteLine("Sensor status - Alarm");
-                                break;
-                            case 4:
-                                Console.WriteLine("Sensor status - Fault");
-                                break;
-                            case 8:
-                                Console.WriteLine("Sensor status - Disabled");
-                                break;
-                            default:
-                                Console.WriteLine("Sensor status - Unknown");
-                                break;
+                            Console.WriteLine(ModbusSettings.printDecor);
+                            Console.WriteLine($"Sensor number - {deviceModel.Sensors[i].SensorNumber}");
+                            Console.WriteLine(ModbusSettings.printDecor);
+                            Console.WriteLine("Sensor Status: {0}", (SensorStatusEnum)deviceModel.Sensors[i].SensorStatus);                          
+                            Console.WriteLine($"Current temperature: {deviceModel.Sensors[i].CurrentTemperature}");
+                            Console.WriteLine($"Lower limit: {deviceModel.Sensors[i].LowerLimit}");
+                            Console.WriteLine($"Higher limit: {deviceModel.Sensors[i].HigherLimit}");
                         }
-                        Console.WriteLine($"Current temperature: {deviceModel.Sensors[i].CurrentTemperature}");
-                        Console.WriteLine($"Lower limit: {deviceModel.Sensors[i].LowerLimit}");
-                        Console.WriteLine($"Higher limit: {deviceModel.Sensors[i].HigherLimit}");
                     }
                     Thread.Sleep(ModbusSettings.refreshDataMs);
                 }
