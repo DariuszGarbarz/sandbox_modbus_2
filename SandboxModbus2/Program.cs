@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using System;
+using System.Threading;
 
 namespace SandboxModbus2
 {
@@ -7,16 +8,16 @@ namespace SandboxModbus2
     {
         static void Main(string[] args)
         {
-            var container = ContainerConfig.Configure();
+            using var container = ContainerConfig.Configure();
+            using var tokenSource = new CancellationTokenSource();
 
-            using (var scope = container.BeginLifetimeScope())
-            {
-                var app = scope.Resolve<IInitialization>();
-                app.Run();
-            }
+            var app = container.Resolve<IApplication>();
+            app.Run(tokenSource.Token);
+
 
             Console.WriteLine("Modbus Test App");
             Console.ReadLine();
+            tokenSource.Cancel();
         }
     }
 }

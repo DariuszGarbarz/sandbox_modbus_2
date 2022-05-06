@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SandboxModbus2Tests
 {
-    public class ModbusReadDataTests
+    public class ModbusDataReaderTests
     {
         private readonly Mock<IModbusMaster> _masterMock = new Mock<IModbusMaster>();
         [SetUp]
@@ -18,7 +18,7 @@ namespace SandboxModbus2Tests
         {
         }
 
-        readonly ModbusReadData _modbusReadData = new ModbusReadData();
+        readonly ModbusDataReader _modbusReadData = new ModbusDataReader();
 
         [Test]
         public async Task SystemStatusReadTest()
@@ -30,7 +30,7 @@ namespace SandboxModbus2Tests
             {
                 1
             };
-            _masterMock.Setup(x => x.ReadHoldingRegistersAsync(slaveNumber, ModbusSettings.systemStatusStartAdress, ModbusSettings.systemStatusNumberOfPoints))
+            _masterMock.Setup(x => x.ReadHoldingRegistersAsync(slaveNumber, ModbusSettings.SystemStatusStartAdress, ModbusSettings.SystemStatusNumberOfPoints))
                 .ReturnsAsync(expected);
 
             //act
@@ -47,11 +47,18 @@ namespace SandboxModbus2Tests
             byte slaveNumber = 1;
             var expected = new ushort[31]
             {
-                69, 76, 65, 67, 79, 77, 80, 73, 76, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                19525, 17217, 19791, 18768, 76, 
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                0, 0, 0, 0
             };
-            _masterMock.Setup(x => x.ReadHoldingRegistersAsync(slaveNumber, ModbusSettings.deviceNameStartAdress, ModbusSettings.deviceNameNumberOfPoints))
+            _masterMock.Setup(x => x.ReadHoldingRegistersAsync(slaveNumber, ModbusSettings.DeviceNameStartAdress, ModbusSettings.DeviceNameNumberOfPoints))
                 .ReturnsAsync(expected);
-            var expectedString = "ELACOMPIL\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";           
+            var expectedString = "ELACOMPIL" +
+                "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +
+                "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +
+                "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +
+                "\0\0\0\0\0\0\0\0";           
 
             //act
             var actualString = await _modbusReadData.DeviceNameRead(_masterMock.Object, slaveNumber);
@@ -94,9 +101,9 @@ namespace SandboxModbus2Tests
                 2, 0, 0, 0
             };
 
-            _masterMock.Setup(x => x.ReadHoldingRegistersAsync(slaveNumber, 100, ModbusSettings.sensorNumberOfPoints))
+            _masterMock.Setup(x => x.ReadHoldingRegistersAsync(slaveNumber, 100, ModbusSettings.SensorNumberOfPoints))
                 .ReturnsAsync(expected1);
-            _masterMock.Setup(x => x.ReadHoldingRegistersAsync(slaveNumber, 200, ModbusSettings.sensorNumberOfPoints))
+            _masterMock.Setup(x => x.ReadHoldingRegistersAsync(slaveNumber, 200, ModbusSettings.SensorNumberOfPoints))
                 .ReturnsAsync(expected2);            
 
             //act

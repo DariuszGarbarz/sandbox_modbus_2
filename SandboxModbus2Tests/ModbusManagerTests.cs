@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SandboxModbus2Tests
 {
     //placeholder with some previous code that could be useful in consoleprint tests
-    public class ConsolePrintDataTests
+    public class ModbusManagerTests
     {
         //private readonly Mock<IModbusMaster> _masterMock = new Mock<IModbusMaster>();
         [SetUp]

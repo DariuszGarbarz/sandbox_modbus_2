@@ -6,6 +6,12 @@ using System.Text;
 
 namespace SandboxModbus2.Modbus
 {
+    public interface ITcpClientFactory
+    {
+        IModbusMaster Master { get; set; }
+        TcpClient Client { get; set; }
+    }
+
     public class TcpClientFactory : ITcpClientFactory
     {
         public IModbusMaster Master { get; set; }
@@ -18,7 +24,7 @@ namespace SandboxModbus2.Modbus
                 var factory = new ModbusFactory();
                 Client = new TcpClient();
                 Master = factory.CreateMaster(Client);
-                Client.Connect(ModbusSettings.hostname, ModbusSettings.port);
+                Client.Connect(ModbusSettings.Hostname, ModbusSettings.Port);
             }
             catch (Exception ex)
             {
