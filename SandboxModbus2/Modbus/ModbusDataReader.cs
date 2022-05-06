@@ -60,17 +60,8 @@ namespace SandboxModbus2.Modbus
                 var deviceName = await master.ReadHoldingRegistersAsync
                     (slaveNumber, ModbusSettings.DeviceNameStartAdress, ModbusSettings.DeviceNameNumberOfPoints);
 
-                var bytes = new List<byte>();
-
-                for (var numberOfPoints = 0; numberOfPoints < deviceName.Length; numberOfPoints++)
-                    bytes.AddRange(BitConverter.GetBytes(deviceName[numberOfPoints]));
-
-                var decodedString = Encoding.ASCII.GetString(bytes.ToArray());
-
-                //I should check why code below cannot convert form IEnumerable<byte[]> to byte[]
-
-                //var decodedString = Encoding.ASCII.
-                //    GetString(deviceName.Select(x => BitConverter.GetBytes(x).ToArray()));
+                var decodedString = Encoding.ASCII.
+                    GetString(deviceName.SelectMany(x => BitConverter.GetBytes(x)).ToArray());
 
                 return decodedString;
             }
