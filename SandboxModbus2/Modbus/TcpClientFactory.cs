@@ -13,10 +13,17 @@ namespace SandboxModbus2.Modbus
 
         public TcpClientFactory()
         {
-            var factory = new ModbusFactory();
-            Client = new TcpClient();
-            Master = factory.CreateMaster(Client);
-            Client.Connect(ModbusSettings.hostname, ModbusSettings.port);
+            try
+            {
+                var factory = new ModbusFactory();
+                Client = new TcpClient();
+                Master = factory.CreateMaster(Client);
+                Client.Connect(ModbusSettings.hostname, ModbusSettings.port);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }

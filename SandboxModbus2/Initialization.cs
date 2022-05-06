@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace SandboxModbus2
 {
-    public class Application : IApplication
+    public class Initialization : IInitialization
     {
         IConsolePrintData _consolePrintData;
  
-        public Application(IConsolePrintData consolePrintData)
+        public Initialization(IConsolePrintData consolePrintData)
         {
             _consolePrintData = consolePrintData;
         }

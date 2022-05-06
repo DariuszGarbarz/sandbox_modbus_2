@@ -1,6 +1,6 @@
 ﻿namespace SandboxModbus2
 {
-    public interface IApplication
+    public interface IInitialization
     {
         void Run();
     }

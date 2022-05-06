@@ -11,7 +11,7 @@ namespace SandboxModbus2
 
             using (var scope = container.BeginLifetimeScope())
             {
-                var app = scope.Resolve<IApplication>();
+                var app = scope.Resolve<IInitialization>();
                 app.Run();
             }
 
