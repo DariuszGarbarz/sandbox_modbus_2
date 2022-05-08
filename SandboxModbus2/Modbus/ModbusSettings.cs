@@ -18,7 +18,7 @@ namespace SandboxModbus2.Modbus
         public static ushort SensorStartAdress = 100;
         public static ushort SensorNumberOfPoints = 4;
 
-        public static int RefreshDataMs = 20000;
+        public static TimeSpan RefreshDataMs = new TimeSpan(0, 0, 20);
         public static string PrintDecor = "-------------------------";
     }
 }

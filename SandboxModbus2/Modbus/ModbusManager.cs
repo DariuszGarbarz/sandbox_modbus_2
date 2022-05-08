@@ -1,4 +1,5 @@
 ﻿using NModbus;
+using SandboxModbus2.Comparers;
 using SandboxModbus2.Enums;
 using SandboxModbus2.Models;
 using System;
@@ -18,10 +19,16 @@ namespace SandboxModbus2.Modbus
     {
         private IModbusDataReader _modbusReadData;
         private ITcpClientFactory _tcpClientFactory;
-        public ModbusManager(IModbusDataReader modbusReadData, ITcpClientFactory tcpClientFactory)
+        private IEqualityComparer<DeviceModel> _deviceComparer;
+        private IEqualityComparer<SensorModel> _sensorComparer;
+
+        public ModbusManager(IModbusDataReader modbusReadData, ITcpClientFactory tcpClientFactory,
+            IEqualityComparer<DeviceModel> deviceComparer, IEqualityComparer<SensorModel> sensorComparer)
         {
             _modbusReadData = modbusReadData;
             _tcpClientFactory = tcpClientFactory;
+            _deviceComparer = deviceComparer;
+            _sensorComparer = sensorComparer;
         }
 
         public async Task PrintDataAsync(CancellationToken cancellationToken)
@@ -29,15 +36,15 @@ namespace SandboxModbus2.Modbus
             try
             {
                 List<DeviceModel> deviceList = new List<DeviceModel>();
-                for (byte a = 1; a < ModbusSettings.SlavesCount + 1; a++)
+                for (byte slaveNumber = 1; slaveNumber <= ModbusSettings.SlavesCount; slaveNumber++)
                 {
-                    var deviceModel = await _modbusReadData.ReadData(_tcpClientFactory, a);
+                    var deviceModel = await _modbusReadData.ReadData(_tcpClientFactory, slaveNumber);
 
                     PrintDeviceData(deviceModel);
 
-                    for (int i = 0; i < deviceModel.Sensors.Count; i++)
+                    for (var sensorNumber = 0; sensorNumber < deviceModel.Sensors.Count; sensorNumber++)
                     {
-                        PrintSensorsData(deviceModel, i);
+                        PrintSensorsData(deviceModel.Sensors[sensorNumber]);
                     }   
 
                         deviceList.Add(deviceModel);
@@ -48,21 +55,22 @@ namespace SandboxModbus2.Modbus
                     if (cancellationToken.IsCancellationRequested)
                         return;
 
-                    for (byte a = 1; a < ModbusSettings.SlavesCount+1; a++)
+                    for (byte slaveNumber = 1; slaveNumber <= ModbusSettings.SlavesCount; slaveNumber++)
                     {
-                        var deviceModel = await _modbusReadData.ReadData(_tcpClientFactory, a);
-                        if (deviceModel != deviceList[a-1])
+                        var deviceModel = await _modbusReadData.ReadData(_tcpClientFactory, slaveNumber);
+                        if (!_deviceComparer.Equals(deviceModel, deviceList[slaveNumber-1]))
                         {
                             PrintDeviceData(deviceModel);
 
-                            for (int i = 0; i < deviceModel.Sensors.Count; i++)
+                            for (int sensorNumber = 0; sensorNumber < deviceModel.Sensors.Count; sensorNumber++)
                             {
-                                if (deviceModel.Sensors[i] != deviceList[a - 1].Sensors[i])
+                                if (!_sensorComparer.Equals(deviceModel.Sensors[sensorNumber],
+                                    deviceList[slaveNumber - 1].Sensors[sensorNumber]))
                                 {
-                                    PrintSensorsData(deviceModel, i);
+                                    PrintSensorsData(deviceModel.Sensors[sensorNumber]);
                                 }
                             }
-                            deviceList[a - 1] = deviceModel;
+                            deviceList[slaveNumber - 1] = deviceModel;
                         }
                     }
                     await Task.Delay(ModbusSettings.RefreshDataMs, cancellationToken);
@@ -87,15 +95,15 @@ namespace SandboxModbus2.Modbus
             Console.WriteLine($"Device Name:{deviceModel.DeviceName}");
         }
 
-        public void PrintSensorsData(DeviceModel deviceModel, int i)
+        public void PrintSensorsData(SensorModel sensor)
         {
             Console.WriteLine(ModbusSettings.PrintDecor);
-            Console.WriteLine($"Sensor number - {deviceModel.Sensors[i].SensorNumber}");
+            Console.WriteLine($"Sensor number - {sensor.SensorNumber}");
             Console.WriteLine(ModbusSettings.PrintDecor);
-            Console.WriteLine($"Sensor Status: {(SensorStatusEnum)deviceModel.Sensors[i].SensorStatus}");
-            Console.WriteLine($"Current temperature: {deviceModel.Sensors[i].CurrentTemperature}");
-            Console.WriteLine($"Lower limit: {deviceModel.Sensors[i].LowerLimit}");
-            Console.WriteLine($"Higher limit: {deviceModel.Sensors[i].HigherLimit}");
+            Console.WriteLine($"Sensor Status: {(SensorStatusEnum)sensor.SensorStatus}");
+            Console.WriteLine($"Current temperature: {sensor.CurrentTemperature}");
+            Console.WriteLine($"Lower limit: {sensor.LowerLimit}");
+            Console.WriteLine($"Higher limit: {sensor.HigherLimit}");
         }
     }
 }
