@@ -1,10 +1,8 @@
 ﻿using NModbus;
-using SandboxModbus2.Comparers;
 using SandboxModbus2.Enums;
 using SandboxModbus2.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +16,7 @@ namespace SandboxModbus2.Modbus
     public class ModbusManager : IModbusManager
     {
         private IModbusDataReader _modbusReadData;
-        private ITcpClientFactory _tcpClientFactory;
+        private IModbusMaster _modbusMaster;
         private IEqualityComparer<DeviceModel> _deviceComparer;
         private IEqualityComparer<SensorModel> _sensorComparer;
 
@@ -26,7 +24,7 @@ namespace SandboxModbus2.Modbus
             IEqualityComparer<DeviceModel> deviceComparer, IEqualityComparer<SensorModel> sensorComparer)
         {
             _modbusReadData = modbusReadData;
-            _tcpClientFactory = tcpClientFactory;
+            _modbusMaster = tcpClientFactory.Master;
             _deviceComparer = deviceComparer;
             _sensorComparer = sensorComparer;
         }
@@ -38,14 +36,12 @@ namespace SandboxModbus2.Modbus
                 List<DeviceModel> deviceList = new List<DeviceModel>();
                 for (byte slaveNumber = 1; slaveNumber <= ModbusSettings.SlavesCount; slaveNumber++)
                 {
-                    var deviceModel = await _modbusReadData.ReadData(_tcpClientFactory, slaveNumber);
+                    var deviceModel = await _modbusReadData.ReadData(_modbusMaster, slaveNumber, ModbusSettings.SensorsCount);
 
                     PrintDeviceData(deviceModel);
 
                     for (var sensorNumber = 0; sensorNumber < deviceModel.Sensors.Count; sensorNumber++)
-                    {
-                        PrintSensorsData(deviceModel.Sensors[sensorNumber]);
-                    }   
+                        PrintSensorsData(deviceModel.Sensors[sensorNumber]); 
 
                         deviceList.Add(deviceModel);
                 }
@@ -57,7 +53,8 @@ namespace SandboxModbus2.Modbus
 
                     for (byte slaveNumber = 1; slaveNumber <= ModbusSettings.SlavesCount; slaveNumber++)
                     {
-                        var deviceModel = await _modbusReadData.ReadData(_tcpClientFactory, slaveNumber);
+                        var deviceModel = await _modbusReadData.ReadData(_modbusMaster, slaveNumber, ModbusSettings.SensorsCount);
+
                         if (!_deviceComparer.Equals(deviceModel, deviceList[slaveNumber-1]))
                         {
                             PrintDeviceData(deviceModel);
@@ -66,9 +63,7 @@ namespace SandboxModbus2.Modbus
                             {
                                 if (!_sensorComparer.Equals(deviceModel.Sensors[sensorNumber],
                                     deviceList[slaveNumber - 1].Sensors[sensorNumber]))
-                                {
                                     PrintSensorsData(deviceModel.Sensors[sensorNumber]);
-                                }
                             }
                             deviceList[slaveNumber - 1] = deviceModel;
                         }
@@ -88,7 +83,7 @@ namespace SandboxModbus2.Modbus
         public void PrintDeviceData(DeviceModel deviceModel)
         {
             Console.WriteLine(ModbusSettings.PrintDecor);
-            Console.WriteLine(DateTime.Now.ToString());
+            Console.WriteLine(DateTime.Now);
             Console.WriteLine(ModbusSettings.PrintDecor);
             Console.WriteLine($"Slave number: {deviceModel.SlaveNumber}");
             Console.WriteLine($"System Status: {(SystemStatusEnum)deviceModel.SystemStatus}");

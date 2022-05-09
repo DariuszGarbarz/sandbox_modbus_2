@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SandboxModbus2.Enums
+﻿namespace SandboxModbus2.Enums
 {
     public enum SensorStatusEnum: ushort
     {

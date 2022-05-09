@@ -1,7 +1,4 @@
 ﻿using SandboxModbus2.Modbus;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +20,8 @@ namespace SandboxModbus2
 
         public void Run(CancellationToken cancellationToken)
         {
-            Task.Run(() => _consolePrintData.PrintDataAsync(cancellationToken), cancellationToken);
+            Task.Run(() => _consolePrintData
+            .PrintDataAsync(cancellationToken), cancellationToken);
         }
     }
 }

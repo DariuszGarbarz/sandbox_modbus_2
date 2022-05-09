@@ -14,7 +14,6 @@ namespace SandboxModbus2
             var app = container.Resolve<IApplication>();
             app.Run(tokenSource.Token);
 
-
             Console.WriteLine("Modbus Test App");
             Console.ReadLine();
             tokenSource.Cancel();

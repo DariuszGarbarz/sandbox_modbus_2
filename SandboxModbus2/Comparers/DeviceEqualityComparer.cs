@@ -1,7 +1,5 @@
 ﻿using SandboxModbus2.Models;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SandboxModbus2.Comparers
 {
@@ -9,7 +7,6 @@ namespace SandboxModbus2.Comparers
     {
         public bool Equals(DeviceModel x, DeviceModel y)
         {
-
             if (ReferenceEquals(x, y)) return true;
             if (ReferenceEquals(x, null)) return false;
             if (ReferenceEquals(y, null)) return false;
