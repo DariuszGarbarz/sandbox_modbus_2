@@ -2,7 +2,7 @@
 {
     public enum SystemStatusEnum : ushort
     {
-        ConnectionProblem,
+        Unknown,
         Normal = 1,
         Fault
     }

@@ -2,7 +2,7 @@
 {
     public enum SensorStatusEnum: ushort
     {
-        ConnectionProblem,
+        Unknown,
         Online = 1,
         Alarm = 2,
         Fault = 4,

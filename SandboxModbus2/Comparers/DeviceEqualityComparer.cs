@@ -28,6 +28,7 @@ namespace SandboxModbus2.Comparers
 
         public int GetHashCode(DeviceModel obj)
         {
+            // system.hashcode.combine
             return obj.GetHashCode();
         }
     }

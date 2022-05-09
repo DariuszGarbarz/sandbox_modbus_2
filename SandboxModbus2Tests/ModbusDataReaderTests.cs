@@ -53,7 +53,7 @@ namespace SandboxModbus2Tests
             byte slaveNumber = 1;
             var valueReturnedFromRegister = new ushort[5]
             {
-                19525, 17217, 19791, 18768, 76
+                17740, 16707, 20301, 20553, 19456
             };
 
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync
@@ -85,9 +85,9 @@ namespace SandboxModbus2Tests
                 {
                     SensorNumber = 1,
                     SensorStatus = 1,
-                    CurrentTemperature = 10,
-                    LowerLimit = 5,
-                    HigherLimit = 20
+                    CurrentTemperature = 1,
+                    LowerLimit = 0,
+                    HigherLimit = 2
                 },
 
                 new SensorModel
@@ -155,9 +155,9 @@ namespace SandboxModbus2Tests
                 {
                     SensorNumber = 1,
                     SensorStatus = 1,
-                    CurrentTemperature = 10,
-                    LowerLimit = 5,
-                    HigherLimit = 20
+                    CurrentTemperature = 1,
+                    LowerLimit = 0,
+                    HigherLimit = 2
                 },
 
                 new SensorModel
@@ -178,7 +178,7 @@ namespace SandboxModbus2Tests
 
             var deviceNameReturnedFromRegister = new ushort[5]
             {
-                19525, 17217, 19791, 18768, 76
+                17740, 16707, 20301, 20553, 19456
             };
 
             var deviceStatusReturnedFromRegister = new ushort[1]

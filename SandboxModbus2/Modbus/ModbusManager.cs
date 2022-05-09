@@ -58,10 +58,10 @@ namespace SandboxModbus2.Modbus
                     for (byte slaveNumber = 1; slaveNumber <= ModbusSettings.SlavesCount; slaveNumber++)
                     {
                         var deviceModel = await _modbusReadData
-                        .ReadData(_modbusMaster, slaveNumber, ModbusSettings.SensorsCount,
-                        ModbusSettings.SystemStatusStartAdress, ModbusSettings.SystemStatusNumberOfPoints,
-                        ModbusSettings.DeviceNameStartAdress, ModbusSettings.DeviceNameNumberOfPoints,
-                        ModbusSettings.SensorStartAdress, ModbusSettings.SensorNumberOfPoints);
+                            .ReadData(_modbusMaster, slaveNumber, ModbusSettings.SensorsCount,
+                                ModbusSettings.SystemStatusStartAdress, ModbusSettings.SystemStatusNumberOfPoints,
+                                ModbusSettings.DeviceNameStartAdress, ModbusSettings.DeviceNameNumberOfPoints,
+                                ModbusSettings.SensorStartAdress, ModbusSettings.SensorNumberOfPoints);
 
                         if (!_deviceComparer.Equals(deviceModel, deviceList[slaveNumber-1]))
                         {

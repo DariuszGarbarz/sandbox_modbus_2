@@ -77,7 +77,7 @@ namespace SandboxModbus2.Modbus
                     deviceNameNumberOfPoints);
 
                 var decodedString = Encoding.ASCII.
-                    GetString(deviceName.SelectMany(x => BitConverter.GetBytes(x)).ToArray());
+                    GetString(deviceName.SelectMany(x => BitConverter.GetBytes(x).Reverse()).ToArray());
 
                 return decodedString;
             }
@@ -95,7 +95,9 @@ namespace SandboxModbus2.Modbus
             try
             {
                 var sensors = new List<SensorModel>();
-
+                //Incoming data is i.e. 16,9C which is represented as 169 ushort
+                //temperaturePrecision is to cut off ",9"
+                var temperaturePrecision = 10;
                 for (var sensorNumber = 1; sensorNumber <= sensorsCount; sensorNumber++)
                 {
                     var startAdress = sensorNumber * sensorStartAdress;
@@ -105,9 +107,9 @@ namespace SandboxModbus2.Modbus
                     { 
                         SensorNumber = sensorNumber,
                         SensorStatus = sensorData[0],
-                        CurrentTemperature = sensorData[1],
-                        LowerLimit = sensorData[2],
-                        HigherLimit = sensorData[3],
+                        CurrentTemperature = (ushort)(sensorData[1] / temperaturePrecision),
+                        LowerLimit = (ushort)(sensorData[2] / temperaturePrecision),
+                        HigherLimit = (ushort)(sensorData[3] / temperaturePrecision),
                     };
                     sensors.Add(sensor);
                 }
