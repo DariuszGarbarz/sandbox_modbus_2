@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SandboxModbus2.Comparers
 {
-    internal sealed class SensorEqualityComparer: IEqualityComparer<SensorModel>
+    public sealed class SensorEqualityComparer: IEqualityComparer<SensorModel>
     {
         public bool Equals(SensorModel x, SensorModel y)
         {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SandboxModbus2.Comparers
 {
-    internal sealed class DeviceEqualityComparer: IEqualityComparer<DeviceModel>
+    public sealed class DeviceEqualityComparer: IEqualityComparer<DeviceModel>
     {
         public bool Equals(DeviceModel x, DeviceModel y)
         {
