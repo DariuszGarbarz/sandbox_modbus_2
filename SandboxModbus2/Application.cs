@@ -11,16 +11,16 @@ namespace SandboxModbus2
 
     public class Application : IApplication
     {
-        IModbusManager _consolePrintData;
+        IModbusManager _modbusManager;
  
-        public Application(IModbusManager consolePrintData)
+        public Application(IModbusManager modbusManager)
         {
-            _consolePrintData = consolePrintData;
+            _modbusManager= modbusManager;
         }
 
         public void Run(CancellationToken cancellationToken)
         {
-            Task.Run(() => _consolePrintData
+            Task.Run(() => _modbusManager
             .PrintDataAsync(cancellationToken), cancellationToken);
         }
     }
