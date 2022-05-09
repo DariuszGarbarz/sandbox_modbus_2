@@ -1,22 +1,23 @@
 ﻿using System;
+using System.Configuration;
 
 namespace SandboxModbus2.Modbus
 {
     public static class ModbusSettings
     {
-        public static string Hostname = "localhost";
-        public static int Port = 502;
+        public static string Hostname = ConfigurationManager.AppSettings["Hostname"];
+        public static int Port = int.Parse(ConfigurationManager.AppSettings["Port"]);
 
-        public static int SensorsCount = 10;
-        public static int SlavesCount = 2;
-        public static ushort SystemStatusStartAdress = 0;
-        public static ushort SystemStatusNumberOfPoints = 1;
-        public static ushort DeviceNameStartAdress = 1;
-        public static ushort DeviceNameNumberOfPoints = 32;
-        public static ushort SensorStartAdress = 100;
-        public static ushort SensorNumberOfPoints = 4;
+        public static int SensorsCount = int.Parse(ConfigurationManager.AppSettings["SensorsCount"]);
+        public static int SlavesCount = int.Parse(ConfigurationManager.AppSettings["SlavesCount"]);
+        public static ushort SystemStatusStartAdress = ushort.Parse(ConfigurationManager.AppSettings["SystemStatusStartAdress"]);
+        public static ushort SystemStatusNumberOfPoints = ushort.Parse(ConfigurationManager.AppSettings["SystemStatusNumberOfPoints"]);
+        public static ushort DeviceNameStartAdress = ushort.Parse(ConfigurationManager.AppSettings["DeviceNameStartAdress"]);
+        public static ushort DeviceNameNumberOfPoints = ushort.Parse(ConfigurationManager.AppSettings["DeviceNameNumberOfPoints"]);
+        public static ushort SensorStartAdress = ushort.Parse(ConfigurationManager.AppSettings["SensorStartAdress"]);
+        public static ushort SensorNumberOfPoints = ushort.Parse(ConfigurationManager.AppSettings["SensorNumberOfPoints"]);
 
-        public static TimeSpan RefreshDataMs = new TimeSpan(0, 0, 20);
-        public static string PrintDecor = "-------------------------";
+        public static TimeSpan RefreshDataMs = TimeSpan.Parse(ConfigurationManager.AppSettings["RefreshDataMs"]);
+        public static string PrintDecor = ConfigurationManager.AppSettings["PrintDecor"];
     }
 }

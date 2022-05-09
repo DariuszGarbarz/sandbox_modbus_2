@@ -10,22 +10,34 @@ namespace SandboxModbus2.Modbus
 {
     public interface IModbusDataReader
     {
-        Task<string> DeviceNameRead(IModbusMaster master, byte slaveNumber);
-        Task<DeviceModel> ReadData(IModbusMaster modbusMaster, byte slaveNumber, int sensorsCount);
-        Task<List<SensorModel>> SensorsRead(IModbusMaster master, int sensorsNumber, byte slaveNumber);
-        Task<ushort> SystemStatusRead(IModbusMaster master, byte slaveNumber);
+        Task<string> DeviceNameRead(IModbusMaster master, byte slaveNumber,
+            ushort deviceNameStartAdress, ushort deviceNameNumberOfPoints);
+        Task<DeviceModel> ReadData(IModbusMaster modbusMaster, byte slaveNumber, int sensorsCount,
+            ushort systemStatusStartAdress, ushort systemStatusNumberOfPoints,
+            ushort deviceNameStartAdress, ushort deviceNameNumberOfPoints,
+            ushort sensorStartAdress, ushort sensorNumberOfPoints);
+        Task<List<SensorModel>> SensorsRead(IModbusMaster master, int sensorsNumber, byte slaveNumber,
+            ushort sensorStartAdress, ushort sensorNumberOfPoints);
+        Task<ushort> SystemStatusRead(IModbusMaster master, byte slaveNumber,
+            ushort systemStatusStartAdress, ushort systemStatusNumberOfPoints);
     }
 
     public class ModbusDataReader : IModbusDataReader
     {
-        public async Task<DeviceModel> ReadData(IModbusMaster modbusMaster, byte slaveNumber, int sensorsCount)
+        public async Task<DeviceModel> ReadData(IModbusMaster modbusMaster, byte slaveNumber, int sensorsCount,
+            ushort systemStatusStartAdress, ushort systemStatusNumberOfPoints,
+            ushort deviceNameStartAdress, ushort deviceNameNumberOfPoints,
+            ushort sensorStartAdress, ushort sensorNumberOfPoints)
         {
-                var systemStatus = await SystemStatusRead(modbusMaster, slaveNumber);
+                var systemStatus = await SystemStatusRead(modbusMaster, slaveNumber,
+                    systemStatusStartAdress, systemStatusNumberOfPoints);
 
-                var deviceName = await DeviceNameRead(modbusMaster, slaveNumber);
+                var deviceName = await DeviceNameRead(modbusMaster, slaveNumber,
+                    deviceNameStartAdress, deviceNameNumberOfPoints);
 
                 var sensors = await SensorsRead
-                    (modbusMaster, sensorsCount, slaveNumber);
+                    (modbusMaster, sensorsCount, slaveNumber,
+                    sensorStartAdress, sensorNumberOfPoints);
 
                 var device = new DeviceModel()
                 {
@@ -38,13 +50,14 @@ namespace SandboxModbus2.Modbus
                 return device;            
         }
 
-        public async Task<ushort> SystemStatusRead(IModbusMaster master, byte slaveNumber)
+        public async Task<ushort> SystemStatusRead(IModbusMaster master, byte slaveNumber,
+            ushort systemStatusStartAdress, ushort systemStatusNumberOfPoints)
         {
             try
             {
                 var systemStatus = await master.ReadHoldingRegistersAsync
-                    (slaveNumber, ModbusSettings.SystemStatusStartAdress,
-                    ModbusSettings.SystemStatusNumberOfPoints);
+                    (slaveNumber, systemStatusStartAdress,
+                    systemStatusNumberOfPoints);
                 return systemStatus[0];
             }
             catch (Exception ex)
@@ -54,13 +67,14 @@ namespace SandboxModbus2.Modbus
             }
         }
 
-        public async Task<string> DeviceNameRead(IModbusMaster master, byte slaveNumber)
+        public async Task<string> DeviceNameRead(IModbusMaster master, byte slaveNumber,
+            ushort deviceNameStartAdress, ushort deviceNameNumberOfPoints)
         {
             try
             {
                 var deviceName = await master.ReadHoldingRegistersAsync
-                    (slaveNumber, ModbusSettings.DeviceNameStartAdress,
-                    ModbusSettings.DeviceNameNumberOfPoints);
+                    (slaveNumber, deviceNameStartAdress,
+                    deviceNameNumberOfPoints);
 
                 var decodedString = Encoding.ASCII.
                     GetString(deviceName.SelectMany(x => BitConverter.GetBytes(x)).ToArray());
@@ -75,7 +89,8 @@ namespace SandboxModbus2.Modbus
         }
 
         public async Task<List<SensorModel>> SensorsRead
-            (IModbusMaster master, int sensorsCount, byte slaveNumber)
+            (IModbusMaster master, int sensorsCount, byte slaveNumber,
+            ushort sensorStartAdress, ushort sensorNumberOfPoints)
         {
             try
             {
@@ -83,9 +98,9 @@ namespace SandboxModbus2.Modbus
 
                 for (var sensorNumber = 1; sensorNumber <= sensorsCount; sensorNumber++)
                 {
-                    var startAdress = sensorNumber * ModbusSettings.SensorStartAdress;
+                    var startAdress = sensorNumber * sensorStartAdress;
                     var sensorData = await master.ReadHoldingRegistersAsync
-                        (slaveNumber, (ushort)startAdress, ModbusSettings.SensorNumberOfPoints);
+                        (slaveNumber, (ushort)startAdress, sensorNumberOfPoints);
                     var sensor = new SensorModel() 
                     { 
                         SensorNumber = sensorNumber,

@@ -22,6 +22,8 @@ namespace SandboxModbus2Tests
         public async Task SystemStatusReadTest()
         {
             //arrange
+            ushort systemStatusStartAdress = 0;
+            ushort systemStatusNumberOfPoints = 1;
             byte slaveNumber = 1;
             ushort expectedValue = 1;
             var valueReturnedFromRegister = new ushort[1]
@@ -30,13 +32,13 @@ namespace SandboxModbus2Tests
             };
 
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync
-            (slaveNumber, ModbusSettings.SystemStatusStartAdress,
-            ModbusSettings.SystemStatusNumberOfPoints))
+            (slaveNumber, systemStatusStartAdress,
+            systemStatusNumberOfPoints))
                 .ReturnsAsync(valueReturnedFromRegister);
 
             //act
             var actualValue = await _modbusReadData
-                .SystemStatusRead(_masterMock.Object, slaveNumber);
+                .SystemStatusRead(_masterMock.Object, slaveNumber, systemStatusStartAdress, systemStatusNumberOfPoints);
 
             //assert
             Assert.That(actualValue, Is.EqualTo(expectedValue));
@@ -46,6 +48,8 @@ namespace SandboxModbus2Tests
         public async Task DeviceNameReadTest()
         {
             //arrange
+            ushort deviceNameStartAdress = 1;
+            ushort deviceNameNumberOfPoints = 5;
             byte slaveNumber = 1;
             var valueReturnedFromRegister = new ushort[5]
             {
@@ -53,15 +57,15 @@ namespace SandboxModbus2Tests
             };
 
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync
-            (slaveNumber, ModbusSettings.DeviceNameStartAdress,
-            ModbusSettings.DeviceNameNumberOfPoints))
+            (slaveNumber, deviceNameStartAdress,
+            deviceNameNumberOfPoints))
                 .ReturnsAsync(valueReturnedFromRegister);
 
             var expectedString = "ELACOMPIL\0";           
 
             //act
             var actualString = await _modbusReadData
-                .DeviceNameRead(_masterMock.Object, slaveNumber);
+                .DeviceNameRead(_masterMock.Object, slaveNumber, deviceNameStartAdress, deviceNameNumberOfPoints);
 
             //assert
             Assert.That(actualString, Is.EqualTo(expectedString));
@@ -71,6 +75,8 @@ namespace SandboxModbus2Tests
         public async Task SensorsReadTest()
         {
             //arrange
+            ushort sensorNumberStartAdress = 100;
+            ushort sensorNumberNumberOfPoints = 4;
             byte slaveNumber = 1;
             var sensorsCount = 2;
             List<SensorModel> expectedSensors = new List<SensorModel>
@@ -105,15 +111,15 @@ namespace SandboxModbus2Tests
             };
 
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync
-            (slaveNumber, 100, ModbusSettings.SensorNumberOfPoints))
+            (slaveNumber, 100, sensorNumberNumberOfPoints))
                 .ReturnsAsync(firstValueReturnedFromRegister);
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync
-            (slaveNumber, 200, ModbusSettings.SensorNumberOfPoints))
+            (slaveNumber, 200, sensorNumberNumberOfPoints))
                 .ReturnsAsync(secondValueReturnedFromRegister);
 
             //act
             var actualSensors = await _modbusReadData
-                .SensorsRead(_masterMock.Object, sensorsCount, slaveNumber);
+                .SensorsRead(_masterMock.Object, sensorsCount, slaveNumber, sensorNumberStartAdress, sensorNumberNumberOfPoints);
 
             //assert
             for (int sensorNumber = 0; sensorNumber < sensorsCount; sensorNumber++)
@@ -135,6 +141,12 @@ namespace SandboxModbus2Tests
         public async Task ReadDataTest()
         {
             //arrange
+            ushort systemStatusStartAdress = 0;
+            ushort systemStatusNumberOfPoints = 1;
+            ushort deviceNameStartAdress = 1;
+            ushort deviceNameNumberOfPoints = 5;
+            ushort sensorNumberStartAdress = 100;
+            ushort sensorNumberOfPoints = 4;
             byte slaveNumber = 1;
             var sensorsCount = 2;
             List<SensorModel> expectedSensors = new List<SensorModel>
@@ -185,25 +197,28 @@ namespace SandboxModbus2Tests
             };
 
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync
-            (slaveNumber, ModbusSettings.DeviceNameStartAdress,
-            ModbusSettings.DeviceNameNumberOfPoints))
+            (slaveNumber, deviceNameStartAdress,
+            deviceNameNumberOfPoints))
                 .ReturnsAsync(deviceNameReturnedFromRegister);
 
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync
-            (slaveNumber, ModbusSettings.SystemStatusStartAdress,
-            ModbusSettings.SystemStatusNumberOfPoints))
+            (slaveNumber, systemStatusStartAdress,
+            systemStatusNumberOfPoints))
                 .ReturnsAsync(deviceStatusReturnedFromRegister);
 
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync
-            (slaveNumber, 100, ModbusSettings.SensorNumberOfPoints))
+            (slaveNumber, 100, sensorNumberOfPoints))
                 .ReturnsAsync(firstSensorReturnedFromRegister);
             _masterMock.Setup(x => x.ReadHoldingRegistersAsync
-            (slaveNumber, 200, ModbusSettings.SensorNumberOfPoints))
+            (slaveNumber, 200, sensorNumberOfPoints))
                 .ReturnsAsync(secondSensorReturnedFromRegister);
 
             //act
             var actualDevice = await _modbusReadData
-                .ReadData(_masterMock.Object, slaveNumber, sensorsCount);
+                .ReadData(_masterMock.Object, slaveNumber, sensorsCount,
+                systemStatusStartAdress, systemStatusNumberOfPoints,
+                deviceNameStartAdress, deviceNameNumberOfPoints, 
+                sensorNumberStartAdress, sensorNumberOfPoints);
 
             //assert
             Assert.That(actualDevice.SystemStatus, Is.EqualTo(expectedDevice.SystemStatus));
