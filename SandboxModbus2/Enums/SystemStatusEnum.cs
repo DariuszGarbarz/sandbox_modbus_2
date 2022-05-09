@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SandboxModbus2.Enums
+﻿namespace SandboxModbus2.Enums
 {
     public enum SystemStatusEnum : ushort
     {
+        Unknown,
         Normal = 1,
         Fault
     }

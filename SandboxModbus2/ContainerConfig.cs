@@ -1,8 +1,8 @@
 ﻿using Autofac;
+using SandboxModbus2.Comparers;
 using SandboxModbus2.Modbus;
-using System;
+using SandboxModbus2.Models;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SandboxModbus2
 {
@@ -12,13 +12,16 @@ namespace SandboxModbus2
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<Initialization>().As<IInitialization>();
-            builder.RegisterType<ModbusReadData>().As<IModbusReadData>();
-            builder.RegisterType<ConsolePrintData>().As<IConsolePrintData>();
+            builder.RegisterType<Application>().As<IApplication>();
+            builder.RegisterType<ModbusDataReader>().As<IModbusDataReader>();
+            builder.RegisterType<ModbusManager>().As<IModbusManager>();
             builder.RegisterType<TcpClientFactory>().As<ITcpClientFactory>().InstancePerLifetimeScope();
+            builder.RegisterType<DeviceEqualityComparer>().As<IEqualityComparer<DeviceModel>>()
+                .InstancePerLifetimeScope();
+            builder.RegisterType<SensorEqualityComparer>().As<IEqualityComparer<SensorModel>>()
+                .InstancePerLifetimeScope();
 
             return builder.Build();
         }
-
     }
 }
